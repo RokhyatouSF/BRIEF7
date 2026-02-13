@@ -1,69 +1,155 @@
-# 📦 Application de gestion de stock (Python + MySQL)
+# Système de gestion de tickets – Centre de formation
 
-Cette application permet de gérer un stock de produits avec catégories et mouvements.  
-Elle est conçue pour une **structure solidaire ou petite entreprise** et fonctionne en **ligne de commande**.
+## Présentation
+Ce projet est une application Python connectée à MySQL permettant de gérer un système de tickets interne dans un centre de formation.  
+Il simule un fonctionnement réel avec plusieurs profils d’utilisateurs et des droits d’accès précis selon le rôle.
 
-Avec ce programme, vous pouvez :
+L’objectif est de proposer un outil simple mais structuré pour :
+- signaler des problèmes
+- les assigner à un membre du personnel
+- suivre leur traitement
+- garantir la traçabilité des actions
 
-- Ajouter, modifier et supprimer des catégories
-- Ajouter, modifier et supprimer des produits
-- Gérer les mouvements de stock (ajout/retrait)
-- Suivre l’historique des mouvements
-- Identifier par des alertes les produits en rupture ou faible stock
+Le système repose sur une logique professionnelle inspirée d’un environnement pédagogique réel.
 
 ---
 
-## 🗄️ Base de données MySQL
+## Rôles disponibles
+Le système gère plusieurs rôles :
 
-Le projet utilise MySQL pour stocker toutes les données dans trois tables principales :  
+- apprenant  
+- technicien  
+- coach formateur hard skills  
+- coach soft skills  
+- surveillant  
+- référent  
+- gardien  
+- admin  
 
-### Tables
+Chaque rôle possède des permissions spécifiques.
 
-#### 1. `Categories`
-- `id_categorie` : identifiant unique (auto-increment)
-- `nom_categorie` : nom de la catégorie
-- `description_categorie` : description de la catégorie
+---
 
-#### 2. `Produits`
-- `id_produit` : identifiant unique (auto-increment)
-- `designation` : nom du produit
-- `prix` : prix du produit
-- `id_categorie` : référence à la catégorie
-- `statut` : disponible / en rupture
+## Fonctionnement général
 
-#### 3. `Mouvements`
-- `id_mouvement` : identifiant unique (auto-increment)
-- `quantite` : nombre d’unités ajoutées ou retirées
-- `action` : type d’opération (`ajout` ou `retrait`)
-- `id_produit` : référence au produit
-- `dateheure` : date et heure du mouvement
+### Apprenant
+L’apprenant peut :
+- créer un ticket
+- choisir le rôle qui doit traiter sa demande
+- voir la liste des utilisateurs correspondant à ce rôle
+- sélectionner la personne qui prendra en charge son ticket
+- suivre l’état de ses tickets
 
-### Exemple de création de la base
+Menu apprenant :
+1 Créer ticket
+2 Mes tickets
+0 Déconnexion
 
-```sql
-CREATE DATABASE IF NOT EXISTS stock_db;
-USE stock_db;
 
-CREATE TABLE Categories(
-    id_categorie INT AUTO_INCREMENT PRIMARY KEY,
-    nom_categorie VARCHAR(100) NOT NULL,
-    description_categorie TEXT
-);
+Lors de la création d’un ticket :
+1. l’apprenant choisit un rôle  
+2. le système affiche les utilisateurs de ce rôle  
+3. il sélectionne la personne  
+4. le ticket est créé avec statut **en attente**
 
-CREATE TABLE Produits(
-    id_produit INT AUTO_INCREMENT PRIMARY KEY,
-    designation VARCHAR(100) NOT NULL,
-    prix DECIMAL(10,2),
-    id_categorie INT,
-    statut ENUM('disponible','en rupture') DEFAULT 'disponible',
-    FOREIGN KEY (id_categorie) REFERENCES Categories(id_categorie)
-);
+---
 
-CREATE TABLE Mouvements(
-    id_mouvement INT AUTO_INCREMENT PRIMARY KEY,
-    quantite INT NOT NULL,
-    action ENUM('ajout','retrait'),
-    id_produit INT,
-    dateheure DATETIME DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (id_produit) REFERENCES Produits(id_produit)
-);
+### Staff (coach, technicien, référent, surveillant, gardien)
+Les membres du staff peuvent :
+
+- voir les tickets qui leur sont assignés
+- consulter les informations de l’apprenant
+- modifier le statut du ticket :
+  - en attente
+  - en cours
+  - résolu
+- gérer les promotions
+- gérer les formations
+
+Le niveau d’urgence d’un ticket est calculé automatiquement selon le délai maximal de traitement.
+
+---
+
+### Administrateur
+L’administrateur possède tous les droits.
+
+Il peut :
+- voir tous les tickets
+- assigner des tickets
+- gérer les rôles
+- gérer les promos
+- gérer les formations
+- consulter les logs
+- voir qui a fait quoi et à quel moment
+
+Menu admin :
+1 Voir tickets assignés
+3 Ajouter promo
+4 Ajouter formation
+5 Assigner ticket
+6 Voir logs
+0 Déconnexion
+
+
+---
+
+## Sécurité des données
+
+Le système a été conçu pour garantir trois principes fondamentaux.
+
+### Confidentialité
+- mots de passe hachés avec bcrypt  
+- accès contrôlé par rôle  
+- authentification obligatoire  
+
+### Intégrité
+- base de données relationnelle  
+- contraintes SQL  
+- statuts contrôlés  
+- cohérence des relations  
+
+### Non-répudiation
+Toutes les actions sont enregistrées dans une table de logs.
+
+Chaque action conserve :
+- la date
+- l’utilisateur
+- l’action effectuée
+- le ticket concerné
+
+Exemple d’affichage des logs pour l’administrateur :
+
+ID Ticket : 2
+Titre : Plateforme qui ne marche pas
+Créé par : Rokhyatou Fall
+Assigné à : Cheikh Talla
+Statut : resolu
+Date création : 2026-02-13 12:40:36
+
+
+L’administrateur peut donc savoir précisément :
+qui a créé un ticket,  
+à qui il a été assigné,  
+et comment il a été traité.
+
+---
+
+## Base de données
+
+Tables principales :
+- utilisateurs
+- roles
+- tickets
+- demandes
+- promos
+- formations
+- logs
+
+Relations :
+- un utilisateur possède un rôle
+- un ticket est créé par un apprenant
+- un ticket est assigné à un membre du staff
+- chaque ticket possède un statut
+- chaque action est enregistrée
+
+---
