@@ -88,6 +88,7 @@ Menu admin :
 4 Ajouter formation
 5 Assigner ticket
 6 Voir logs
+7 Voir tous les tickets(qui a fait la demande & qui l'a traité)
 0 Déconnexion
 
 
@@ -117,7 +118,7 @@ Chaque action conserve :
 - l’action effectuée
 - le ticket concerné
 
-Exemple d’affichage des logs pour l’administrateur :
+Exemple d’affichage de l'option 7 Voir tous les tickets(qui a fait la demande & qui l'a traité) pour l’administrateur :
 
 ID Ticket : 2
 Titre : Plateforme qui ne marche pas
